@@ -1,4 +1,22 @@
-{{left_sidebar_enabled,right_sidebar_enabled=False,('message' in globals())}}
 {{extend 'layout.html'}}
 
-<h4>{{=T('SILT')}}</h4>
+<form class="form-inline" action={{=URL('default','index')}} method="POST">
+	<input type="text" class="input-small" name="query" placeholder="Filter text">
+	<button type="submit" class="btn">Filter</button>
+</form>
+
+
+<hr />
+{{for images in images:}}
+	{{=A(IMG(_src=URL('static', 'images/slit/tn/%(imageId)s.jpg' % images), _width=160, _height=120),_href=URL('main','label/%(id)s' % images))}}
+{{pass}}
+
+{{ if total_pages > 1:}}
+<div class="pages">
+{{ for i in range(1, total_pages+2): }}
+	{{ if page == i: }} {{=i}} {{ else: }}    	
+    	{{=A('%s' % i, _href=URL('/index/%d' % i))}}
+    	{{ pass }}
+{{ pass }}
+</div>
+{{ pass }}

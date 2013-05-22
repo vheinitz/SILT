@@ -33,7 +33,7 @@ db.define_table('lableType',
 	Field('name','string'),
 	Field('readUserGroup','integer'),
 	Field('setUserGroup','integer'),
-	Field('valueType','json')
+    Field('valueType','string')
 )
 db.define_table('imageLable',
 	Field('imageId','string'),

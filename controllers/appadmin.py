@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-
-# ##########################################################
-# ## make sure administrator is on localhost
-# ###########################################################
+#SILT - Simple Image Labling Tool
+#Valentin Heinitz, http://heinitz-it.de, 2013
+#Powered by web2py, derived from welcome-app
 
 import os
 import socket

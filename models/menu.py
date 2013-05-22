@@ -18,9 +18,9 @@ response.meta.generator = 'Web2py Web Framework'
 response.menu = [
     (T('Home'), False, URL('default', 'index'), []),
 	(T('Lables'), False, URL('default', 'manage_lables'), [
-		(T('Add'), False, URL('default', 'add_lables'))
+#		(T('Add'), False, URL('default', 'add_lables'))
 	]),
-	(T('Images'), False, URL('default', 'images'), [
-		(T('Add'), False, URL('default', 'add_images'))
-	])
+#	(T('Images'), False, URL('default', 'images'), [
+#		(T('Add'), False, URL('default', 'add_images'))
+#	])
 ]

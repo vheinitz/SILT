@@ -10,10 +10,15 @@
 		<b>{{=label.lableType.name}}: {{=label.imageLable.lableValue}}</b><br/>
 	{{pass}}
 	<h4>Select New Label Type: </h4>
-	{{for lableType in lableTypes:}}
-		<input onclick="getFormContents('{{=URL('main','getLableFormContet')}}', {{=lableType.id}})" type="radio" name="lableType[]" value="{{=lableType.name}}" /> {{=lableType.name}}<br/> 
-	{{pass}}
-	<form method="post" action="{{=URL('main','addLable')}}">
+	
+	<select name='lableType'>			
+		<option name="empty" />
+		{{for lableType in lableTypes:}}
+			<option onclick="getFormContents('{{=URL('default','getLableFormContet')}}', {{=lableType.id}})" type="radio" name="lableType[]" value="{{=lableType.name}}" /> {{=lableType.name}}<br/> 
+		{{pass}}
+	</select>
+	
+	<form method="post" action="{{=URL('default','addLable')}}">
 		<div id="lableFormContent">
 		</div>
 		<input type="hidden" name="imageId" value="{{=img.id}}" />

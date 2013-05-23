@@ -5,7 +5,7 @@
 
 
 def index():
-	per_page = 5
+	per_page = 10
 	total_images = db(db.image.id > 0).count()
 	total_pages = total_images / per_page	
 	if total_images > per_page and total_pages == 1 and total_pages * per_page != total_images:
@@ -40,7 +40,7 @@ def addLable():
 
 	#inserting lable value in imageLable
 	db.imageLable.insert(imageId=imageId, lableId=lableTypeId, lableValue=lableValue);
-	redirect(URL('main', 'label/'+imageId))
+	redirect(URL('default', 'label/'+imageId))
 	
 def manage_lables():
 	return dict(message=T('Lables'))

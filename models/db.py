@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#SILT - Simple Image Labling Tool
+#SILT - Simple Image Labeling Tool
 #Valentin Heinitz, http://heinitz-it.de, 2013
 #Powered by web2py, derived from welcome-app
 
@@ -14,7 +14,7 @@ auth = Auth(db)
 crud, service, plugins = Crud(db), Service(), PluginManager()
 
 ## create all tables needed by auth if not custom tables
-auth.define_tables(username=False, signature=False)
+auth.define_tables(username=True, signature=False)
 
 ## configure email
 #mail = auth.settings.mailer
@@ -23,13 +23,14 @@ auth.define_tables(username=False, signature=False)
 #mail.settings.login = ''
 
 ## configure auth policy
+auth.settings.actions_disabled.append('register')
 auth.settings.registration_requires_verification = False
 auth.settings.registration_requires_approval = False
 auth.settings.reset_password_requires_verification = True
 
 
 # DB-schema
-db.define_table('lableType',
+db.define_table('labelType',
 	Field('name','string'),
 	Field('readUserGroup','integer'),
 	Field('setUserGroup','integer'),
@@ -37,11 +38,11 @@ db.define_table('lableType',
 )
 db.define_table('imageLable',
 	Field('imageId','string'),
-	Field('lableId','integer'),
+	Field('labelId','integer'),
 	Field('userId','integer'), 
-	Field('lableValue','text'),
+	Field('labelValue','text'),
 	Field('replacedById','integer'),
-	Field('lableComment','text')
+	Field('labelComment','text')
 )
 db.define_table('image',
 	Field('imageId','string')

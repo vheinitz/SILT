@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#SILT - Simple Image Labling Tool
+#SILT - Simple Image Labeling Tool
 #Valentin Heinitz, http://heinitz-it.de, 2013
 #Powered by web2py, derived from welcome-app
 
@@ -17,36 +17,43 @@ def index():
 	if not query:
 		images = db(db.image).select(orderby=~db.image.id, limitby=(limit, per_page*page))
 	else:
-		images = db((db.imageLable.lableValue.like('%'+query+'%')) & (db.imageLable.imageId == db.image.id)).select(orderby=~db.image.id, limitby=(limit, per_page*page))
+		images = db((db.imageLabel.labelValue.like('%'+query+'%')) & (db.imageLabel.imageId == db.image.id)).select(orderby=~db.image.id, limitby=(limit, per_page*page))
+	print images
 	return locals()
 
+@auth.requires_login()
 def label():
 	import json
 	id = request.args(0)
 	img = db.image(id)
-	labels = db((db.imageLable.imageId == id) & (db.lableType.id == db.imageLable.lableId)).select(db.imageLable.lableValue, db.lableType.name)
-	lableTypes = db(db.lableType).select(db.lableType.id, db.lableType.name)
+	labels = db((db.imageLabel.imageId == id) & (db.labelType.id == db.imageLabel.labelId)).select(db.imageLabel.labelValue, db.labelType.name)
+	labelTypes = db(db.labelType).select(db.labelType.id, db.labelType.name)
 	return locals()		
 
-def getLableFormContet():
-	lableId = request.post_vars['lableId']
-	lable = db(db.lableType.id == lableId).select(db.lableType.valueType)
-	return lable[0].valueType
+def getLabelFormContet():
+	labelId = request.post_vars['labelId']
+	label = db(db.labelType.id == labelId).select(db.labelType.valueType)
+	return label[0].valueType
 
-def addLable():
-	lableTypeId = request.post_vars['lableId']
+@auth.requires_login()	
+def addLabel():
+	labelTypeId = request.post_vars['labelId']
 	imageId = request.post_vars['imageId']
-	lableValue = request.post_vars['value']
+	labelValue = request.post_vars['value']
 
-	#inserting lable value in imageLable
-	db.imageLable.insert(imageId=imageId, lableId=lableTypeId, lableValue=lableValue);
+	#inserting label value in imageLabel
+	db.imageLabel.insert(imageId=imageId, labelId=labelTypeId, labelValue=labelValue, userId=auth.user.id);
 	redirect(URL('default', 'label/'+imageId))
 	
-def manage_lables():
-	return dict(message=T('Lables'))
+@auth.requires_login()	
+def manage_labels():
+	#return dict(message=T('Labels'))
+    query = ((db.labelType.id>0))
+    form = SQLFORM.grid( query=query, deletable=True, editable=True, maxtextlength=64, paginate=10, user_signature=False)
+    return dict(form=form)
 
-def add_lables():
-   form = SQLFORM(db.lableType)
+def add_labels():
+   form = SQLFORM(db.labelType)
    if form.process().accepted:
 	   response.flash = 'form accepted'
    elif form.errors:
@@ -81,6 +88,11 @@ def user():
 	"""
 	return dict(form=auth())
 
+#users management
+def users():
+    query = ((db.auth_user.id>0))
+    form = SQLFORM.grid( query=query, deletable=True, editable=True, maxtextlength=64, paginate=10, user_signature=False)
+    return dict(form=form)
 
 def download():
 	"""

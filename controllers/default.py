@@ -3,6 +3,7 @@
 #Valentin Heinitz, http://heinitz-it.de, 2013
 #Powered by web2py, derived from welcome-app
 
+import datetime
 
 def index():
 	per_page = 10
@@ -26,7 +27,12 @@ def label():
 	import json
 	id = request.args(0)
 	img = db.image(id)
-	labels = db((db.imageLabel.imageId == id) & (db.labelType.id == db.imageLabel.labelId)).select(db.imageLabel.labelValue, db.labelType.name)
+	
+	labels = db((db.imageLabel.labelId == db.labelType.id) ).select( 
+		db.imageLabel.labelValue, db.labelType.name, db.auth_user.first_name, db.auth_user.last_name, db.imageLabel.labelTimeStamp, 
+		left=db.auth_user.on(db.imageLabel.userId==db.auth_user.id)
+		)
+
 	labelTypes = db(db.labelType).select(db.labelType.id, db.labelType.name)
 	return locals()		
 
@@ -42,7 +48,7 @@ def addLabel():
 	labelValue = request.post_vars['value']
 
 	#inserting label value in imageLabel
-	db.imageLabel.insert(imageId=imageId, labelId=labelTypeId, labelValue=labelValue, userId=auth.user.id);
+	db.imageLabel.insert(imageId=imageId, labelId=labelTypeId, labelValue=labelValue, userId=auth.user.id, labelTimeStamp=datetime.datetime.now() );
 	redirect(URL('default', 'label/'+imageId))
 	
 @auth.requires_login()	

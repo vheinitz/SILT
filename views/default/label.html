@@ -7,7 +7,7 @@
 <div style="display: inline-block; padding-left:10px">
 	<h4>Labels:</h4>
 	{{for label in labels:}}
-		<b>{{=label.labelType.name}}: {{=label.imageLabel.labelValue}}</b><br/>
+		<b>{{=label.labelType.name}}:</b> {{=label.imageLabel.labelValue}}, (by {{=label.auth_user.first_name}} {{=label.auth_user.last_name}} on {{=label.imageLabel.labelTimeStamp}})<br/>
 	{{pass}}
 	<h4>Select New Label Type: </h4>
 	

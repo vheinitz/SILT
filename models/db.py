@@ -34,14 +34,16 @@ db.define_table('labelType',
 	Field('name','string'),
 	Field('readUserGroup','integer'),
 	Field('setUserGroup','integer'),
-    Field('valueType','string')
+    Field('valueType','string'),
+	Field('info','text')
 )
-db.define_table('imageLable',
+db.define_table('imageLabel',
 	Field('imageId','string'),
 	Field('labelId','integer'),
 	Field('userId','integer'), 
 	Field('labelValue','text'),
 	Field('replacedById','integer'),
+	Field('labelTimeStamp','datetime'),
 	Field('labelComment','text')
 )
 db.define_table('image',

@@ -18,8 +18,10 @@ def index():
 		images = db(db.image).select(orderby=~db.image.id, limitby=(limit, per_page*page))
 	else:
 		images = db((db.imageLable.lableValue.like('%'+query+'%')) & (db.imageLable.imageId == db.image.id)).select(orderby=~db.image.id, limitby=(limit, per_page*page))
+	print images
 	return locals()
 
+@auth.requires_login()
 def label():
 	import json
 	id = request.args(0)
@@ -39,11 +41,14 @@ def addLable():
 	lableValue = request.post_vars['value']
 
 	#inserting lable value in imageLable
-	db.imageLable.insert(imageId=imageId, lableId=lableTypeId, lableValue=lableValue);
+	db.imageLable.insert(imageId=imageId, lableId=lableTypeId, lableValue=lableValue, userId=auth.user.id);
 	redirect(URL('default', 'label/'+imageId))
 	
 def manage_lables():
-	return dict(message=T('Lables'))
+	#return dict(message=T('Lables'))
+    query = ((db.lableType.id>0))
+    form = SQLFORM.grid( query=query, deletable=True, editable=True, maxtextlength=64, paginate=10, user_signature=False)
+    return dict(form=form)
 
 def add_lables():
    form = SQLFORM(db.lableType)
@@ -81,6 +86,11 @@ def user():
 	"""
 	return dict(form=auth())
 
+#users management
+def users():
+    query = ((db.auth_user.id>0))
+    form = SQLFORM.grid( query=query, deletable=True, editable=True, maxtextlength=64, paginate=10, user_signature=False)
+    return dict(form=form)
 
 def download():
 	"""

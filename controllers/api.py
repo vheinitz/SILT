@@ -4,25 +4,51 @@
 #Powered by web2py, derived from welcome-app
 #TPDP: check if working at all, provide curl examples in comments
 
+import datetime
+
+#JSON EXAMPLE: ["789456", "124"]
+#CURL EXAMPLE: curl -X POST -d data='["789456", "124"]' http://[app]/api/add_images
+def add_images():
+    import json
+    vars = request.vars
+    json_data = vars["data"];
+    j = json.loads(json_data)
+    for i, imageId in enumerate(j):
+        db.image.insert(imageId = imageId)
+
+
+#JSON EXAMPLE: {"name":"a", "readUserGroup":"2", "setUserGroup":"1", "valueType":["positive","negative"], "info":"a"}
+#CURl EXAMPLE: curl -X POST -d data='{"name":"a", "readUserGroup":"2", "setUserGroup":"1", "valueType":["positive","negative"], "info":"a"}' http://[app]/api/add_label_types
+def add_label_types():
+    import json
+    vars = request.vars
+    json_data = vars["data"];
+    j = json.loads(json_data)
+    name = j["name"]
+
+    #check to see whether a lableType with this name already exists
+    row = db.labelType(name=name)
+    if not row:
+        valueType = json.dumps(j["valueType"])
+        db.labelType.insert(name=j["name"], readUserGroup=int(j["readUserGroup"]), setUserGroup=int(j["setUserGroup"]), valueType=valueType, info=j["info"]);
+
+
+#JSON EXAMPLE: {"imageId":"123456", "labels": [{"labelName":"result","labelValue":"positive","replacedById":"0","labelComment":""}]}
+#CURL EXAMPLE: curl -X POST -d data='{"imageId":"123456", "labels": [{"labelName":"result","labelValue":"positive","replacedById":"0","labelComment":""}]}' http://[app]/api/add_image_labels
 def add_image_labels():
     import json
     vars = request.vars
     json_data = vars["data"]
     j = json.loads(json_data)
 
-    #inserting data in images table
-    row = db.images.insert(hash_value=j["imageId"])
-
-    #inserting data in labels table
+    img=db.image(imageId = j["imageId"]);
     labels = j["labels"]
-    for label_name, label_value in labels.items():
-        db.labels.insert(label_name=label_name, label_value=label_value, image=row)  
+    for i, labelData in enumerate(labels):
+        #if label doesn't exist - create it
+        label = db.labelType(name = labelData["labelName"])
+        if not label:
+            label = db.labelType.insert(name=labelData["labelName"], readUserGroup=0, setUserGroup=0, valueType="[]", info="")
 
-def get_image_labels():
-    import json
-    vars = request.vars
-    json_data = vars["data"]
-    j = json.loads(json_data)
-    row = db((db.images.id == db.labels.image) & (db.images.hash_value==j["imageId"])).select()
-    return dict(row=row)
-
+        #inserting data in imageLabel table
+        db.imageLabel.insert(imageId = img["id"], labelId = label["id"], userId = 0, labelValue = labelData["labelValue"], 
+            replacedById = int(labelData["replacedById"]), labelTimeStamp = datetime.datetime.now(), labelComment = labelData["labelComment"])

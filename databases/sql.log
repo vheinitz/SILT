@@ -80,3 +80,25 @@ CREATE TABLE image(
     imageId CHAR(512)
 );
 success!
+timestamp: 2013-05-28T11:05:37.437000
+CREATE TABLE labelType(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name CHAR(512),
+    readUserGroup INTEGER,
+    setUserGroup INTEGER,
+    valueType CHAR(512),
+    info TEXT
+);
+success!
+timestamp: 2013-05-28T11:05:37.562000
+CREATE TABLE imageLabel(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    imageId CHAR(512),
+    labelId INTEGER,
+    userId INTEGER,
+    labelValue TEXT,
+    replacedById INTEGER,
+    labelTimeStamp TIMESTAMP,
+    labelComment TEXT
+);
+success!

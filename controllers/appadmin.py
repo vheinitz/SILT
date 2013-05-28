@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-#SILT - Simple Image Labling Tool
-#Valentin Heinitz, http://heinitz-it.de, 2013
-#Powered by web2py, derived from welcome-app
+
+# ##########################################################
+# ## make sure administrator is on localhost
+# ###########################################################
 
 import os
 import socket
@@ -571,3 +572,7 @@ def bg_graph_model():
 
 def graph_model():    
     return dict(databases=databases, pgv=pgv)
+
+def users():
+    form = SQLFORM.grid(db.auth_user)
+    return dict(form=form)    

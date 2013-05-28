@@ -7,19 +7,19 @@
 <div style="display: inline-block; padding-left:10px">
 	<h4>Labels:</h4>
 	{{for label in labels:}}
-		<b>{{=label.lableType.name}}: {{=label.imageLable.lableValue}}</b><br/>
+		<b>{{=label.labelType.name}}:</b> {{=label.imageLabel.labelValue}}, (by {{=label.auth_user.first_name}} {{=label.auth_user.last_name}} on {{=label.imageLabel.labelTimeStamp}})<br/>
 	{{pass}}
 	<h4>Select New Label Type: </h4>
 	
-	<select name='lableType'>			
+	<select name='labelType'>			
 		<option name="empty" />
-		{{for lableType in lableTypes:}}
-			<option onclick="getFormContents('{{=URL('default','getLableFormContet')}}', {{=lableType.id}})" type="radio" name="lableType[]" value="{{=lableType.name}}" /> {{=lableType.name}}<br/> 
+		{{for labelType in labelTypes:}}
+			<option onclick="getFormContents('{{=URL('default','getLabelFormContet')}}', {{=labelType.id}})" type="radio" name="labelType[]" value="{{=labelType.name}}" /> {{=labelType.name}}<br/> 
 		{{pass}}
 	</select>
 	
-	<form method="post" action="{{=URL('default','addLable')}}">
-		<div id="lableFormContent">
+	<form method="post" action="{{=URL('default','addLabel')}}">
+		<div id="labelFormContent">
 		</div>
 		<input type="hidden" name="imageId" value="{{=img.id}}" />
 	</form>

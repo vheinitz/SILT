@@ -1,5 +1,5 @@
-function getFormContents($url, $lableId) {
-	$.post($url, {lableId: $lableId}, function(data){
+function getFormContents($url, $labelId) {
+	$.post($url, {labelId: $labelId}, function(data){
 		$data = $.parseJSON(data);
 		if($data.length == 0){
 			$content = "<input type='text' name='value' />"
@@ -10,8 +10,8 @@ function getFormContents($url, $lableId) {
 			})
 			$content = $content + "</select>";
 		}
-		$inputLableId = "<input type='hidden' name='lableId' value='"+$lableId+"' />";
+		$inputLabelId = "<input type='hidden' name='labelId' value='"+$labelId+"' />";
 		$submit = " <br/><input type='submit' class='btn' value='Save' />";
-		$('#lableFormContent').html($content + $inputLableId + $submit);
+		$('#labelFormContent').html($content + $inputLabelId + $submit);
 	})
 }

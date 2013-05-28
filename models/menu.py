@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#SILT - Simple Image Labling Tool
+#SILT - Simple Image Labeling Tool
 #Valentin Heinitz, http://heinitz-it.de, 2013
 #Powered by web2py, derived from welcome-app
 
@@ -17,8 +17,8 @@ response.meta.generator = 'Web2py Web Framework'
 #########################################################################
 response.menu = [
     (T('Home'), False, URL('default', 'index'), []),
-	(T('Lables'), False, URL('default', 'manage_lables'), [
-#		(T('Add'), False, URL('default', 'add_lables'))
+	(T('Labels'), False, URL('default', 'manage_labels'), [
+#		(T('Add'), False, URL('default', 'add_labels'))
 	]),
 #	(T('Images'), False, URL('default', 'images'), [
 #		(T('Add'), False, URL('default', 'add_images'))

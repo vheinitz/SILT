@@ -11,8 +11,13 @@ import datetime
 def add_images():
     import json
     vars = request.vars
-    json_data = vars["data"];
-    j = json.loads(json_data)
+    json_data = vars["data"]
+    try:
+        j = json.loads(json_data)
+    except:
+        return '{"status":"error", "info":"could not decode json"}'
+    else:
+        return '{"status":"ok", "info":"Json decoded"}'
     for i, imageId in enumerate(j):
         db.image.insert(imageId = imageId)
 
@@ -22,8 +27,13 @@ def add_images():
 def add_label_types():
     import json
     vars = request.vars
-    json_data = vars["data"];
-    j = json.loads(json_data)
+    json_data = vars["data"]
+    try:
+        j = json.loads(json_data)
+    except:
+        return '{"status":"error", "info":"could not decode json"}'
+    else:
+        return '{"status":"ok", "info":"Json decoded"}'
     name = j["name"]
 
     #check to see whether a lableType with this name already exists
@@ -39,7 +49,12 @@ def add_image_labels():
     import json
     vars = request.vars
     json_data = vars["data"]
-    j = json.loads(json_data)
+    try:
+        j = json.loads(json_data)
+    except:
+        return '{"status":"error", "info":"could not decode json"}'
+    else:
+        return '{"status":"ok", "info":"Json decoded"}'
 
     img=db.image(imageId = j["imageId"]);
     labels = j["labels"]

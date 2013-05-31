@@ -21,6 +21,8 @@ private slots:
 
     void on_bGenerate_clicked();
 
+    void on_bImport_clicked();
+
 private:
     Ui::MainWindow *ui;
     QImage _img;

@@ -88,3 +88,8 @@ void MainWindow::on_bGenerate_clicked()
        QProcess::startDetached(curl);
     }
 }
+
+void MainWindow::on_bImport_clicked()
+{
+
+}

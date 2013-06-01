@@ -106,13 +106,14 @@ void MainWindow::on_bImport_clicked()
 		QImage img(fn);
 		QString imgName = importImage( img );
 
-		QString data = ui->tImageCurl->toPlainText();
-		data.replace("$IMG",imgName);
+		QString data = QString("[\"%1\"]").arg(imgName);
 		callApi( "http://127.0.0.1:8000/SILT/api/add_images", data );
 		QStringList keys = img.textKeys();
 		foreach( QString k, keys )
 		{
-			
+			data = QString( "{\"imageId\":\"%1\", \"labels\": [{\"labelName\":\"%2\",\"labelValue\":\"%3\",\"replacedById\":\"0\",\"labelComment\":\"\"}]}" )
+				.arg(imgName).arg(k).arg( img.text(k) );
+			callApi( "http://127.0.0.1:8000/SILT/api/add_image_labels", data );
 		}
 	}
 }

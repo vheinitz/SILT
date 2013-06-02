@@ -38,11 +38,11 @@ db.define_table('labelType',
 	Field('info','text')
 )
 db.define_table('imageLabel',
-	Field('imageId','string'),
-	Field('labelId','integer'),
-	Field('userId','integer'), 
+	Field('imageId', 'reference image'),
+	Field('labelId', 'reference labelType'),
+	Field('userId', 'reference auth_user'), 
 	Field('labelValue','text'),
-	Field('replacedById','integer'),
+	Field('replacedById','reference imageLabel'),
 	Field('labelTimeStamp','datetime'),
 	Field('labelComment','text')
 )

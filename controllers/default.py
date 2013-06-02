@@ -36,8 +36,7 @@ def label():
 
 	labels = db( db.imageLabel.imageId == img.id ).select( 
 		db.imageLabel.labelValue, db.labelType.name, db.auth_user.first_name, db.auth_user.last_name, db.imageLabel.labelTimeStamp
-#		,left=db.auth_user.on(db.imageLabel.userId==db.auth_user.id)
-		,left=db.labelType.on(db.imageLabel.labelId == db.labelType.id)
+		,left=[db.labelType.on(db.imageLabel.labelId == db.labelType.id), db.auth_user.on(db.imageLabel.userId==db.auth_user.id)]
 		,orderby=~db.labelType.name
 		)
 

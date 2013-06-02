@@ -15,6 +15,8 @@ namespace Ui {
 class MainWindow;
 }
 
+
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -33,6 +35,7 @@ private slots:
 	QString importImage( QImage );
 
     void callApi( QString surl, QString data );
+	void processReq( );
     void httpFinished();
     void httpReadyRead();
 
@@ -40,6 +43,9 @@ private:
     Ui::MainWindow *ui;
     QImage _img;
 	QNetworkAccessManager _qnam;
+	QStringList _reqs;
+	bool _startReq;
+	
 };
 
 #endif // MAINWINDOW_H

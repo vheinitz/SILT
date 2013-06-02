@@ -15,7 +15,8 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+	_startReq(false)
 {
     ui->setupUi(this);
     PERSISTENCE_INIT( "Heinitz-It", "SLITImport" );
@@ -105,22 +106,45 @@ void MainWindow::on_bImport_clicked()
 		QString fn = fi.absoluteFilePath();
 		QImage img(fn);
 		QString imgName = importImage( img );
-
+		//qApp->processEvents(); 
 		QString data = QString("[\"%1\"]").arg(imgName);
 		callApi( "http://127.0.0.1:8000/SILT/api/add_images", data );
 		QStringList keys = img.textKeys();
+		QString labelData;
 		foreach( QString k, keys )
 		{
-			data = QString( "{\"imageId\":\"%1\", \"labels\": [{\"labelName\":\"%2\",\"labelValue\":\"%3\",\"replacedById\":\"0\",\"labelComment\":\"\"}]}" )
-				.arg(imgName).arg(k).arg( img.text(k) );
+			if (!labelData.isEmpty() )
+				labelData+=",";
+			labelData = QString("{\"labelName\":\"%1\",\"labelValue\":\"%2\",\"replacedById\":\"0\",\"labelComment\":\"\"}").arg(k).arg( img.text(k) );
+			data = QString( "{\"imageId\":\"%1\", \"labels\": [%2]}" ).arg(imgName).arg(labelData) ;
 			callApi( "http://127.0.0.1:8000/SILT/api/add_image_labels", data );
 		}
+		
+		qApp->processEvents(); 
 	}
+	_startReq=true;
+	processReq( );
+
 }
 
 void MainWindow::callApi( QString surl, QString data )
 {
-	QUrl url(surl);
+	_reqs.append( surl+"#"+data);
+	if (_startReq)
+		processReq();
+
+
+}
+
+void MainWindow::processReq( )
+{
+	_startReq=false;
+	if ( _reqs.isEmpty() )
+	{
+		_startReq=true;
+		return;
+	}
+	QUrl url(_reqs.at(0).section("#",0,0));
 
 
 #if QT_VERSION < QT_VERSION_CHECK(5,0,0)
@@ -128,7 +152,8 @@ void MainWindow::callApi( QString surl, QString data )
 #else
     QUrlQuery postData;
 #endif
-    postData.addQueryItem("data",data);
+    postData.addQueryItem("data",_reqs.at(0).section("#",1));
+	_reqs.removeFirst();
     /*for( QMap<QString,QString>::iterator it = _sendDataList.begin(); it !=_sendDataList.end();++it )
     {
         postData.addQueryItem( it.key(), it.value() );
@@ -158,6 +183,7 @@ void MainWindow::httpFinished()
 		return;
     
     reply->deleteLater();
+	processReq( );
 }
 
 void MainWindow::httpReadyRead()

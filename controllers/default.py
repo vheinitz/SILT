@@ -13,10 +13,9 @@ def index():
 		total_pages = 2
 	page = int(request.args(0)) if request.args(0) else 1
 	limit = int(page-1) * per_page
-	#images = db(db.image).select(orderby=~db.image.id, limitby=(limit, per_page*page))
 	query = request.post_vars['query']
 	if not query:
-		images = db(db.image).select(orderby=~db.image.id, limitby=(limit, per_page*page))
+		images = db().select(db.image.id, db.image.imageId, orderby=~db.image.id, limitby=(limit, per_page*page))
 	else:
 		images = db((db.imageLabel.labelValue.like('%'+query+'%')) & (db.imageLabel.imageId == db.image.id)).select(orderby=~db.image.id, limitby=(limit, per_page*page))
 	print images
@@ -27,10 +26,19 @@ def label():
 	import json
 	id = request.args(0)
 	img = db.image(id)
-	
-	labels = db((db.imageLabel.labelId == db.labelType.id) ).select( 
-		db.imageLabel.labelValue, db.labelType.name, db.auth_user.first_name, db.auth_user.last_name, db.imageLabel.labelTimeStamp, 
-		left=db.auth_user.on(db.imageLabel.userId==db.auth_user.id)
+#SELECT labelType.name, imageLabel.labelValue, auth_user.first_name, auth_user.last_name  from imageLabel
+#LEFT JOIN labelType 
+#ON imageLabel.labelId = labelType.id
+#LEFT JOIN auth_user
+#ON imageLabel.userId = auth_user.id
+#WHERE imageLabel.imageId = 581
+#ORDER BY labelType.name
+
+	labels = db( db.imageLabel.imageId == img.id ).select( 
+		db.imageLabel.labelValue, db.labelType.name, db.auth_user.first_name, db.auth_user.last_name, db.imageLabel.labelTimeStamp
+#		,left=db.auth_user.on(db.imageLabel.userId==db.auth_user.id)
+		,left=db.labelType.on(db.imageLabel.labelId == db.labelType.id)
+		,orderby=~db.labelType.name
 		)
 
 	labelTypes = db(db.labelType).select(db.labelType.id, db.labelType.name)

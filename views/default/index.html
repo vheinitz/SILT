@@ -1,7 +1,12 @@
 {{extend 'layout.html'}}
 
+ 
 <form class="form-inline" action={{=URL('default','index')}} method="POST">
-	<input type="text" class="input-small" name="query" placeholder="Filter text">
+{{if query:}} 
+	<input type="text" class="input-small" name="query" value="{{=query}}" >
+{{else:}}	
+	<input type="text" class="input-small" name="query" placeholder="Filter" >
+{{pass}}	
 	<button type="submit" class="btn">Filter</button>
 </form>
 
@@ -16,8 +21,20 @@ pages:
 </div>
 {{ pass }}
 <hr />
-{{for image in images:}}
-	{{=A(IMG(_src=URL('static', 'images/slit/tn/%(imageId)s.jpg' % image), _width=160, _height=120),_href=URL('default','label/%(id)s' % image))}}
+{{if query:}}
+	{{ lastid=-1}}
+	{{for image in images:}}	    
+		{{if lastid != image.image.imageId:}}
+			{{=A(IMG(_src=URL('static', 'images/slit/tn/%(image.imageId)s.jpg' % image), _width=160, _height=120),_href=URL('default','label/%(image.id)s' % image))}}
+			{{lastid = image.image.imageId}}
+		{{pass}}
+<!--List all matches
+		{{=I('%(imageLabel.labelValue)s' % image)}}<br/>
+-->
+	{{pass}}
+{{else:}}
+	{{for image in images:}}
+		{{=A(IMG(_src=URL('static', 'images/slit/tn/%(imageId)s.jpg' % image), _width=160, _height=120),_href=URL('default','label/%(id)s' % image))}}		
+	{{pass}}
 {{pass}}
-
 

@@ -16,10 +16,9 @@ def add_images():
         j = json.loads(json_data)
     except:
         return '{"status":"error", "info":"could not decode json"}'
-    else:
-        return '{"status":"ok", "info":"Json decoded"}'
     for i, imageId in enumerate(j):
         db.image.insert(imageId = imageId)
+    return '{"status":"ok", "info":"Json decoded"}'    
 
 
 #JSON EXAMPLE: {"name":"a", "readUserGroup":"2", "setUserGroup":"1", "valueType":["positive","negative"], "info":"a"}
@@ -32,8 +31,6 @@ def add_label_types():
         j = json.loads(json_data)
     except:
         return '{"status":"error", "info":"could not decode json"}'
-    else:
-        return '{"status":"ok", "info":"Json decoded"}'
     name = j["name"]
 
     #check to see whether a lableType with this name already exists
@@ -41,7 +38,7 @@ def add_label_types():
     if not row:
         valueType = json.dumps(j["valueType"])
         db.labelType.insert(name=j["name"], readUserGroup=int(j["readUserGroup"]), setUserGroup=int(j["setUserGroup"]), valueType=valueType, info=j["info"]);
-
+    return '{"status":"ok", "info":"Json decoded"}'
 
 #JSON EXAMPLE: {"imageId":"123456", "labels": [{"labelName":"result","labelValue":"positive","replacedById":"0","labelComment":""}]}
 #CURL EXAMPLE: curl -X POST -d data='{"imageId":"123456", "labels": [{"labelName":"result","labelValue":"positive","replacedById":"0","labelComment":""}]}' http://[app]/api/add_image_labels
@@ -53,8 +50,6 @@ def add_image_labels():
         j = json.loads(json_data)
     except:
         return '{"status":"error", "info":"could not decode json"}'
-    else:
-        return '{"status":"ok", "info":"Json decoded"}'
 
     img=db.image(imageId = j["imageId"]);
     labels = j["labels"]
@@ -67,3 +62,4 @@ def add_image_labels():
         #inserting data in imageLabel table
         db.imageLabel.insert(imageId = img["id"], labelId = label["id"], userId = 0, labelValue = labelData["labelValue"], 
             replacedById = int(labelData["replacedById"]), labelTimeStamp = datetime.datetime.now(), labelComment = labelData["labelComment"])
+    return '{"status":"ok", "info":"Json decoded"}'

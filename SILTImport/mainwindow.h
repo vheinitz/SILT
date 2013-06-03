@@ -4,9 +4,18 @@
 #include <QMainWindow>
 #include <QImage>
 
+#include <QNetworkAccessManager>
+#include <QUrl>
+
+class QSslError;
+class QAuthenticator;
+class QNetworkReply;
+
 namespace Ui {
 class MainWindow;
 }
+
+
 
 class MainWindow : public QMainWindow
 {
@@ -21,9 +30,22 @@ private slots:
 
     void on_bGenerate_clicked();
 
+    void on_bImport_clicked();
+
+	QString importImage( QImage );
+
+    void callApi( QString surl, QString data );
+	void processReq( );
+    void httpFinished();
+    void httpReadyRead();
+
 private:
     Ui::MainWindow *ui;
     QImage _img;
+	QNetworkAccessManager _qnam;
+	QStringList _reqs;
+	bool _startReq;
+	
 };
 
 #endif // MAINWINDOW_H

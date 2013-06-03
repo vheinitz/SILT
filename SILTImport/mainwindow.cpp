@@ -7,16 +7,21 @@
 #include <QFileInfo>
 #include <QPainter>
 #include <QProcess>
+#include <QDir>
+#include <QNetworkReply>
 #include "persistence.h"
+
 
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+	_startReq(false)
 {
     ui->setupUi(this);
     PERSISTENCE_INIT( "Heinitz-It", "SLITImport" );
     PERSISTENT("LastImage", ui->eImage, "text");
+	PERSISTENT("LastImagesDir", ui->eImageDirPath, "text");
     PERSISTENT("OutputRoot", ui->eRoot, "text");
     PERSISTENT("OutConf", ui->tOutConf, "plainText");
     //PERSISTENT("tLabelCurl", ui->tLabelCurl, "plainText");
@@ -45,10 +50,35 @@ void MainWindow::on_bGenerate_clicked()
     int to = ui->sbTo->value();
     if (from>to)
         return;//error
-    QString root = ui->eRoot->text();
+    
+
+    //QString importCall= "C:/bin/curl.exe -X POST http://127.0.0.1:8000/SILT/default/add_images -d\"imageId=%1&_formkey=3db667ed-9e17-47a3-9b35-94ef9aca9c50&_formname=image/create\"";
+    QPainter p;
+    for (int i=from; i<to; ++i)
+    {
+	   QImage outImg = _img;
+	   p.begin(&outImg);
+       p.setFont(QFont("Arial",50));
+       p.setBrush(QBrush(Qt::blue));
+       p.setPen(QColor(Qt::blue));
+       p.drawText(QPoint(100,100),"Image:"+QString::number(i));
+       p.end();
+	   QString imgName = importImage( outImg );
+
+	   QString curl = ui->tImgLabelCurl->toPlainText();
+	   curl.replace("$IMG",imgName);
+	   curl.replace("$CNT",QString::number(i));
+	   QProcess::startDetached(curl);
+       qApp->processEvents();       
+    }
+}
+
+QString MainWindow::importImage( QImage outImg )
+{
+	QString root = ui->eRoot->text();
 
     if(!QFileInfo(root).exists())
-        return;//error
+		return QString::null;//error
 
     QStringList outConf = ui->tOutConf->toPlainText().split("\n",QString::SkipEmptyParts);
     QMap<QString, QSize> outConfMap;
@@ -56,35 +86,108 @@ void MainWindow::on_bGenerate_clicked()
     {
         outConfMap[s.section(";",0,0)] = QSize( s.section(";",1).section("x",0,0).toInt(), s.section(";",1).section("x",1).toInt() );
     }
+       
+   QString imgName( QCryptographicHash::hash( QByteArray((const char*)(outImg.bits()),outImg.byteCount()), QCryptographicHash::Md5).toBase64().toHex() );
+   outImg.save( root+"/"+imgName+".png" );
+   for ( QMap<QString, QSize>::Iterator it = outConfMap.begin();
+         it!=outConfMap.end(); ++it )
+   {
+        outImg.scaled( it.value() ).save( root+"/"+it.key()+"/"+imgName+".jpg" );
+		qApp->processEvents(); 
+   }  
+   return imgName;
+}
 
-    //QString importCall= "C:/bin/curl.exe -X POST http://127.0.0.1:8000/SILT/default/add_images -d\"imageId=%1&_formkey=3db667ed-9e17-47a3-9b35-94ef9aca9c50&_formname=image/create\"";
-    QPainter p;
-    for (int i=from; i<to; ++i)
+void MainWindow::on_bImport_clicked()
+{
+	QFileInfoList images = QDir(ui->eImageDirPath->text()).entryInfoList(QStringList()<<"*.png");
+	foreach( QFileInfo fi, images )
+	{
+		QString fn = fi.absoluteFilePath();
+		QImage img(fn);
+		QString imgName = importImage( img );
+		//qApp->processEvents(); 
+		QString data = QString("[\"%1\"]").arg(imgName);
+		callApi( "http://127.0.0.1:8000/SILT/api/add_images", data );
+		QStringList keys = img.textKeys();
+		QString labelData;
+		foreach( QString k, keys )
+		{
+			if (!labelData.isEmpty() )
+				labelData+=",";
+			labelData = QString("{\"labelName\":\"%1\",\"labelValue\":\"%2\",\"replacedById\":\"0\",\"labelComment\":\"\"}").arg(k).arg( img.text(k) );
+			data = QString( "{\"imageId\":\"%1\", \"labels\": [%2]}" ).arg(imgName).arg(labelData) ;
+			callApi( "http://127.0.0.1:8000/SILT/api/add_image_labels", data );
+		}
+		
+		qApp->processEvents(); 
+	}
+	_startReq=true;
+	processReq( );
+
+}
+
+void MainWindow::callApi( QString surl, QString data )
+{
+	_reqs.append( surl+"#"+data);
+	if (_startReq)
+		processReq();
+
+
+}
+
+void MainWindow::processReq( )
+{
+	_startReq=false;
+	if ( _reqs.isEmpty() )
+	{
+		_startReq=true;
+		return;
+	}
+	QUrl url(_reqs.at(0).section("#",0,0));
+
+
+#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
+    QUrl postData;
+#else
+    QUrlQuery postData;
+#endif
+    postData.addQueryItem("data",_reqs.at(0).section("#",1));
+	_reqs.removeFirst();
+    /*for( QMap<QString,QString>::iterator it = _sendDataList.begin(); it !=_sendDataList.end();++it )
     {
-       qApp->processEvents();
-       QImage outImg = _img;
+        postData.addQueryItem( it.key(), it.value() );
+    }*/
 
-       p.begin(&outImg);
-       p.setFont(QFont("Arial",50));
-       p.setBrush(QBrush(Qt::blue));
-       p.setPen(QColor(Qt::blue));
-       p.drawText(QPoint(100,100),"Image:"+QString::number(i));
-       p.end();
-       QString imgName( QCryptographicHash::hash( QByteArray((const char*)(outImg.bits()),outImg.byteCount()), QCryptographicHash::Md5).toBase64().toHex() );
-       outImg.save( root+"/"+imgName+".png" );
-       for ( QMap<QString, QSize>::Iterator it = outConfMap.begin();
-             it!=outConfMap.end(); ++it )
-       {
-            outImg.scaled( it.value() ).save( root+"/"+it.key()+"/"+imgName+".jpg" );
-       }
-       QString curl = ui->tImageCurl->toPlainText();
-       curl.replace("$IMG",imgName);
-       curl.replace("$CNT",QString::number(i));
-       QProcess::startDetached(curl);
 
-       curl = ui->tImgLabelCurl->toPlainText();
-       curl.replace("$IMG",imgName);
-       curl.replace("$CNT",QString::number(i));
-       QProcess::startDetached(curl);
-    }
+
+	//_sendDataList.clear();
+
+	QNetworkRequest request(url);
+	request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+	ui->tImgLabelCurl->appendPlainText( "POST: " + url.toString() );
+	ui->tImgLabelCurl->appendPlainText( "  DATA: " + postData.encodedQuery());	
+	QNetworkReply *reply = _qnam.post(request, postData.encodedQuery());
+
+    connect(reply, SIGNAL(finished()),
+         this, SLOT(httpFinished()));
+    connect(reply, SIGNAL(readyRead()),
+         this, SLOT(httpReadyRead()));
+
+}
+
+void MainWindow::httpFinished()
+{
+    QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
+    if (!reply) 
+		return;
+    
+    reply->deleteLater();
+	processReq( );
+}
+
+void MainWindow::httpReadyRead()
+{
+	QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
+	ui->tImgLabelCurl->appendPlainText( "GOT DATA: " + reply->readAll() );
 }
